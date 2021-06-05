@@ -26,7 +26,7 @@ No need to build it.
 
 - Switch locale
    ```cpp
-   i18n::SetLocale("zh-CN")
+   i18n::SetLocale("zh-CN");
    ```
 
 - Translate
@@ -57,15 +57,19 @@ msgstr: 你好世界
 # Build the example
 
 ### Requirements
+
 - The example project can only be built on Windows (because I'm loading fonts from Windows directory). The library is portable.
 
 - [Visual Studio 2019](https://visualstudio.microsoft.com/downloads/)
 
 - [xmake](https://github.com/xmake-io/xmake/releases)
 
+### Build
+
 1. Navigate to the repository using a command prompt.
 
-2. ```sh
+2. Enter the following commands
+   ```sh
    xmake -y
    xmake package
    xmake run
