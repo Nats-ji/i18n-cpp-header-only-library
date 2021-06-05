@@ -1,0 +1,38 @@
+msgid: Hello, world!
+msgstr: ハロー、ワールド！
+
+msgid: This is some useful text.
+msgstr: これは便利なテキストです。
+
+msgid: Another Window
+msgstr: 別のウィンドウ
+
+msgid: float
+msgstr: フロート
+
+msgid: clear color
+msgstr: クリアカラー
+
+msgid: Button
+msgstr: ボタン
+
+msgid: counter = {:d}
+msgstr: カウンター = {:d}
+
+msgid: Application average {:.3f} ms/frame ({:.1f} FPS)
+msgstr: アプリケーション平均{:.3f}ミリ秒/フレーム（{:.1f} FPS）
+
+msgid: Switch to English..
+msgstr: 英語に切り替える。
+
+msgid: Switch to Chinese..
+msgstr: 中国語に切り替える。
+
+msgid: Switch to Japanese..
+msgstr: 日本語に切り替える。
+
+msgid: Hello from another window!
+msgstr: 別のウィンドウからこんにちは！
+
+msgid: Close Me
+msgstr: 閉じる

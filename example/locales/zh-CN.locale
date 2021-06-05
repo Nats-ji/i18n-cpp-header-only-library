@@ -1,0 +1,38 @@
+msgid: Hello, world!
+msgstr: 你好，世界！
+
+msgid: This is some useful text.
+msgstr: 这是一些有用的文字。
+
+msgid: Another Window
+msgstr: 另一个窗口
+
+msgid: float
+msgstr: 浮点数
+
+msgid: clear color
+msgstr: 颜色
+
+msgid: Button
+msgstr: 按钮
+
+msgid: counter = {:d}
+msgstr: 计数器 = {:d}
+
+msgid: Application average {:.3f} ms/frame ({:.1f} FPS)
+msgstr: 应用程序平均{:.3f}毫秒/帧（{:.1f}FPS）。
+
+msgid: Switch to English..
+msgstr: 切换到英语...
+
+msgid: Switch to Chinese..
+msgstr: 切换到中文...
+
+msgid: Switch to Japanese..
+msgstr: 切换到日语...
+
+msgid: Hello from another window!
+msgstr: 从另一个窗口招手
+
+msgid: Close Me
+msgstr: 关闭我
