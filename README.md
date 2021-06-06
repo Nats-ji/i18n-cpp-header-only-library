@@ -109,12 +109,12 @@ msgstr: 背
 
 # Todo
 
-1. ~~Namespace support~~
+- [x] Namespace support
 
-2. Cache the formated strings (To improve performance when using inside a loop)
+- [ ] Cache the formated strings (To improve performance when using inside a loop)
 
-3. Plurals (This is more complicated than I thought)
+- [ ] Plurals (This is more complicated than I thought)
 
-4. Locale file generation scripts (lua for xmake, and python)
+- [ ] Locale file generation scripts (lua for xmake, and python)
 
-5. Add support for json files (i18next format)
+- [ ] Add support for json files (i18next format)
