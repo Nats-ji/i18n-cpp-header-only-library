@@ -15,7 +15,7 @@
 class i18n
 {
   typedef std::unordered_map<std::string, std::unordered_map<std::string, std::string>> dictionary;
-  
+
 public:
 
   i18n(const i18n&) = delete;
@@ -23,7 +23,7 @@ public:
   i18n& operator=(const i18n&) = delete;
   i18n& operator=(i18n&&) = delete;
 
-  static void Init(std::filesystem::path localePath = "locales", std::string locale = "en-US", std::string defaultLocale = "en-US", std::string localeExtension = ".locale");
+  static void Init(std::filesystem::path localePath = "locales", std::string locale = "en-US", std::string defaultLocale = "en-US", std::string defaultNS = "default", std::string localeExtension = ".locale");
 
   static i18n& GetInstance();
 
@@ -48,7 +48,7 @@ private:
   std::string m_locale;
   dictionary m_defaultDictionary;
   dictionary m_dictionary;
-  std::string m_defaultNS {"default"};
+  std::string m_defaultNS;
 
   void ISetLocale(const std::string locale);
 
@@ -67,11 +67,12 @@ private:
   std::filesystem::path getLocalePath(std::string locale);
 };
 
-inline void i18n::Init(std::filesystem::path localePath, std::string locale, std::string defaultLocale, std::string localeExtension)
+inline void i18n::Init(std::filesystem::path localePath, std::string locale, std::string defaultLocale, std::string defaultNS, std::string localeExtension)
 {
   GetInstance().m_localePath = localePath;
   GetInstance().m_defaultLocale = defaultLocale;
   GetInstance().m_locale = locale;
+  GetInstance().m_defaultNS = defaultNS;
   GetInstance().m_localeExtension = localeExtension;
   GetInstance().loadDefaultDictionary();
   SetLocale(locale);
