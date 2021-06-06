@@ -42,7 +42,8 @@ At least C++17 (not sure):
    std::string str2 = i18n::Translate("You catched {0:d} carrots in {1:d} seconds", 5, 2); // Using <format> from C++20 std or {fmt}
    ```
 - Use namespace
-   locale file:
+
+   Locale file:
    ```
    ns: ns1
    msgid: Back
