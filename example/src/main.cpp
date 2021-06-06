@@ -210,6 +210,8 @@ int main(int, char**)
                 counter++;
             ImGui::SameLine();
             ImGui::Text(i18n::Translate("counter = {:d}", counter).c_str());
+            ImGui::Text(i18n::TranslateN("ns1", "Back").c_str());
+            ImGui::Text(i18n::TranslateN("ns2", "Back").c_str());
 
             ImGui::Text(i18n::Translate("Application average {:.3f} ms/frame ({:.1f} FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate).c_str());
             if (ImGui::Button(i18n::Translate("Switch to English..").c_str()) && locale != "en-US")
