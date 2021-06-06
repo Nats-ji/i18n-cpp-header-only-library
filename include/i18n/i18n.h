@@ -25,7 +25,7 @@ public:
 
   static void Init(std::filesystem::path localePath = "locales", std::string locale = "en-US", std::string defaultLocale = "en-US", std::string localeExtension = ".locale");
 
-  static i18n& Get();
+  static i18n& GetInstance();
 
   static void SetLocale(const std::string locale);
   
@@ -72,15 +72,15 @@ private:
 
 inline void i18n::Init(std::filesystem::path localePath, std::string locale, std::string defaultLocale, std::string localeExtension)
 {
-  Get().m_localePath = localePath;
-  Get().m_defaultLocale = defaultLocale;
-  Get().m_locale = locale;
-  Get().m_localeExtension = localeExtension;
-  Get().loadDefaultDictionary();
+  GetInstance().m_localePath = localePath;
+  GetInstance().m_defaultLocale = defaultLocale;
+  GetInstance().m_locale = locale;
+  GetInstance().m_localeExtension = localeExtension;
+  GetInstance().loadDefaultDictionary();
   SetLocale(locale);
 }
 
-inline i18n& i18n::Get()
+inline i18n& i18n::GetInstance()
 {
   static i18n instance;
   return instance;
@@ -88,21 +88,21 @@ inline i18n& i18n::Get()
 
 inline void i18n::SetLocale(const std::string locale)
 {
-  Get().ISetLocale(locale);
+  GetInstance().ISetLocale(locale);
 }
 
 inline std::string i18n::GetLocale() {
-  return Get().m_locale;
+  return GetInstance().m_locale;
 }
 
 inline const std::string i18n::Translate(std::string msgid)
 {
-  return Get().ITranslate(NORMAL, msgid);
+  return GetInstance().ITranslate(NORMAL, msgid);
 }
 
 template<typename... Types>
 inline const std::string i18n::Translate(std::string msgid, Types... args) {
-  return Get().ITranslate(FORMAT, msgid, std::forward<Types>(args)...);
+  return GetInstance().ITranslate(FORMAT, msgid, std::forward<Types>(args)...);
 }
 
 inline void i18n::ISetLocale(const std::string locale)
