@@ -14,7 +14,7 @@
 
 class i18n
 {
-  typedef std::unordered_map<std::string, std::string> dictionary;
+  typedef std::unordered_map<std::string, std::unordered_map<std::string, std::string>> dictionary;
 
 public:
 
@@ -23,7 +23,7 @@ public:
   i18n& operator=(const i18n&) = delete;
   i18n& operator=(i18n&&) = delete;
 
-  static void Init(std::filesystem::path localePath = "locales", std::string locale = "en-US", std::string defaultLocale = "en-US", std::string localeExtension = ".locale");
+  static void Init(std::filesystem::path localePath = "locales", std::string locale = "en-US", std::string defaultLocale = "en-US", std::string defaultNS = "default", std::string localeExtension = ".locale");
 
   static i18n& GetInstance();
 
@@ -31,22 +31,15 @@ public:
   
   static std::string GetLocale();
 
-  static const std::string Translate(std::string msgid);
-
   template<typename... Types>
   static const std::string Translate(std::string msgid, Types... args);
+
+  template<typename... Types>
+  static const std::string TranslateN(std::string nameSpace, std::string msgid, Types... args);
 
 private:
   i18n() {}
   ~i18n() {}
-
-  enum TranlateMode
-  {
-    NORMAL,
-    FORMAT,
-    NAMESPACE,
-    NAMESPACE_FORMAT
-  };
 
   std::filesystem::path m_localePath;
   std::string m_localeExtension;
@@ -55,11 +48,15 @@ private:
   std::string m_locale;
   dictionary m_defaultDictionary;
   dictionary m_dictionary;
+  std::string m_defaultNS;
 
   void ISetLocale(const std::string locale);
 
   template<typename... Types>
-  std::string ITranslate(TranlateMode tm, std::string msgid, Types... args);
+  std::string ITranslate(std::string msgid, Types... args);
+
+  template<typename... Types>
+  std::string ITranslateN(std::string ns, std::string msgid, Types... args);
 
   dictionary parseDictionary(std::filesystem::path locale_path);
 
@@ -70,11 +67,12 @@ private:
   std::filesystem::path getLocalePath(std::string locale);
 };
 
-inline void i18n::Init(std::filesystem::path localePath, std::string locale, std::string defaultLocale, std::string localeExtension)
+inline void i18n::Init(std::filesystem::path localePath, std::string locale, std::string defaultLocale, std::string defaultNS, std::string localeExtension)
 {
   GetInstance().m_localePath = localePath;
   GetInstance().m_defaultLocale = defaultLocale;
   GetInstance().m_locale = locale;
+  GetInstance().m_defaultNS = defaultNS;
   GetInstance().m_localeExtension = localeExtension;
   GetInstance().loadDefaultDictionary();
   SetLocale(locale);
@@ -95,14 +93,14 @@ inline std::string i18n::GetLocale() {
   return GetInstance().m_locale;
 }
 
-inline const std::string i18n::Translate(std::string msgid)
-{
-  return GetInstance().ITranslate(NORMAL, msgid);
+template<typename... Types>
+inline const std::string i18n::Translate(std::string msgid, Types... args) {
+  return GetInstance().ITranslate(msgid, std::forward<Types>(args)...);
 }
 
 template<typename... Types>
-inline const std::string i18n::Translate(std::string msgid, Types... args) {
-  return GetInstance().ITranslate(FORMAT, msgid, std::forward<Types>(args)...);
+inline const std::string i18n::TranslateN(std::string nameSpace, std::string msgid, Types... args) {
+  return GetInstance().ITranslateN(nameSpace, msgid, std::forward<Types>(args)...);
 }
 
 inline void i18n::ISetLocale(const std::string locale)
@@ -112,34 +110,67 @@ inline void i18n::ISetLocale(const std::string locale)
 }
 
 template<typename... Types>
-inline std::string i18n::ITranslate(TranlateMode tm, std::string msgid, Types... args)
+inline std::string i18n::ITranslate(std::string msgid, Types... args)
 {
-  switch (tm)
+  switch (sizeof...(Types) == 0)
   {
-  case NORMAL:
+  case true:
     if (!m_defaultLocale_exists) // If not using a locale file for the default locale
     {
       if (m_locale == m_defaultLocale) return msgid; // Current locale is the default locale
-      if (!m_dictionary.count(msgid)) return msgid; // Tranlation doesn't exist in the locale file
-      return m_dictionary[msgid]; // Return translated string from the dictionary
+      if (!m_dictionary[m_defaultNS].count(msgid)) return msgid; // Tranlation doesn't exist in the locale file
+      return m_dictionary[m_defaultNS][msgid]; // Return translated string from the dictionary
     }
     // If using a locale file for the default locale
-    if (m_locale == m_defaultLocale) return m_defaultDictionary[msgid]; // Current locale is the default locale
-    if (!m_dictionary.count(msgid)) return m_defaultDictionary[msgid]; // Tranlation doesn't exist in the locale file
-    return m_dictionary[msgid]; // Return translated string from the dictionary
+    if (m_locale == m_defaultLocale) return m_defaultDictionary[m_defaultNS][msgid]; // Current locale is the default locale
+    if (!m_dictionary[m_defaultNS].count(msgid)) return m_defaultDictionary[m_defaultNS][msgid]; // Tranlation doesn't exist in the locale file
+    return m_dictionary[m_defaultNS][msgid]; // Return translated string from the dictionary
     break;
   
-  case FORMAT:
+  case false:
     if (!m_defaultLocale_exists) // If not using a locale file for the default locale
     {
       if (m_locale == m_defaultLocale) return i18n_format(msgid, std::forward<Types>(args)...); // Current locale is the default locale
-      if (!m_dictionary.count(msgid)) return i18n_format(msgid, std::forward<Types>(args)...); // Tranlation doesn't exist in the locale file
-      return i18n_format(m_dictionary[msgid], std::forward<Types>(args)...); // Return translated string from the dictionary
+      if (!m_dictionary[m_defaultNS].count(msgid)) return i18n_format(msgid, std::forward<Types>(args)...); // Tranlation doesn't exist in the locale file
+      return i18n_format(m_dictionary[m_defaultNS][msgid], std::forward<Types>(args)...); // Return translated string from the dictionary
     }
     // If using a locale file for the default locale
-    if (m_locale == m_defaultLocale) return i18n_format(m_defaultDictionary[msgid], std::forward<Types>(args)...); // Current locale is the default locale
-    if (!m_dictionary.count(msgid)) return i18n_format(m_defaultDictionary[msgid], std::forward<Types>(args)...); // Tranlation doesn't exist in the locale file
-    return i18n_format(m_dictionary[msgid], std::forward<Types>(args)...); // Return translated string from the dictionary
+    if (m_locale == m_defaultLocale) return i18n_format(m_defaultDictionary[m_defaultNS][msgid], std::forward<Types>(args)...); // Current locale is the default locale
+    if (!m_dictionary[m_defaultNS].count(msgid)) return i18n_format(m_defaultDictionary[m_defaultNS][msgid], std::forward<Types>(args)...); // Tranlation doesn't exist in the locale file
+    return i18n_format(m_dictionary[m_defaultNS][msgid], std::forward<Types>(args)...); // Return translated string from the dictionary
+    break;
+  }
+}
+
+template<typename... Types>
+inline std::string i18n::ITranslateN(std::string ns, std::string msgid, Types... args)
+{
+  switch (sizeof...(Types) == 0)
+  {
+  case true:
+    if (!m_defaultLocale_exists) // If not using a locale file for the default locale
+    {
+      if (m_locale == m_defaultLocale) return msgid; // Current locale is the default locale
+      if (!m_dictionary[ns].count(msgid)) return msgid; // Tranlation doesn't exist in the locale file
+      return m_dictionary[ns][msgid]; // Return translated string from the dictionary
+    }
+    // If using a locale file for the default locale
+    if (m_locale == m_defaultLocale) return m_defaultDictionary[ns][msgid]; // Current locale is the default locale
+    if (!m_dictionary[ns].count(msgid)) return m_defaultDictionary[ns][msgid]; // Tranlation doesn't exist in the locale file
+    return m_dictionary[ns][msgid]; // Return translated string from the dictionary
+    break;
+
+  case false:
+    if (!m_defaultLocale_exists) // If not using a locale file for the default locale
+    {
+      if (m_locale == m_defaultLocale) return i18n_format(msgid, std::forward<Types>(args)...); // Current locale is the default locale
+      if (!m_dictionary[ns].count(msgid)) return i18n_format(msgid, std::forward<Types>(args)...); // Tranlation doesn't exist in the locale file
+      return i18n_format(m_dictionary[ns][msgid], std::forward<Types>(args)...); // Return translated string from the dictionary
+    }
+    // If using a locale file for the default locale
+    if (m_locale == m_defaultLocale) return i18n_format(m_defaultDictionary[ns][msgid], std::forward<Types>(args)...); // Current locale is the default locale
+    if (!m_dictionary[ns].count(msgid)) return i18n_format(m_defaultDictionary[ns][msgid], std::forward<Types>(args)...); // Tranlation doesn't exist in the locale file
+    return i18n_format(m_dictionary[ns][msgid], std::forward<Types>(args)...); // Return translated string from the dictionary
     break;
   }
 }
@@ -147,26 +178,40 @@ inline std::string i18n::ITranslate(TranlateMode tm, std::string msgid, Types...
 inline i18n::dictionary i18n::parseDictionary(std::filesystem::path locale_path)
 {
   dictionary dictionary;
-  enum lineType { MSG_ID, MSG_STR };
+  enum lineType { NS, MSG_ID, MSG_STR };
   std::string line;
-  std::string prev_line;
+  std::string ns_cache, msgid_cache;
   lineType prev_type;
   std::ifstream file (locale_path);
+
   while (std::getline(file, line))
   {
+    if (line.find("ns:") == 0)
+    {
+      line.erase(0, 3);
+      while (line.find(" ") == 0) line.erase(0, 1);
+      msgid_cache.clear();
+      ns_cache = line;
+      prev_type = NS;
+    }
     if (line.find("msgid:") == 0)
     {
       line.erase(0, 6);
       while (line.find(" ") == 0) line.erase(0, 1);
-      prev_line = line;
+      msgid_cache = line;
+      if (prev_type != NS) ns_cache = m_defaultNS;
       prev_type = MSG_ID;
     }
-    if (prev_type == MSG_ID && line.find("msgstr:") == 0)
+    if (line.find("msgstr:") == 0)
     {
-      line.erase(0, 7);
-      while (line.find(" ") == 0) line.erase(0, 1);
-      dictionary[prev_line] = line;
-      prev_line = line;
+      if (prev_type = MSG_ID)
+      {
+        line.erase(0,7);
+        while (line.find(" ") == 0) line.erase(0, 1);
+        dictionary[ns_cache][msgid_cache] = line;
+      }
+      ns_cache.clear();
+      msgid_cache.clear();
       prev_type = MSG_STR;
     }
   }
